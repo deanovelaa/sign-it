@@ -178,7 +178,7 @@ ${opts.showControls ? controlsHTML() : ''}
     if (isEmpty()) return;
     strokes.pop();
     changed();
-    announce(isEmpty() ? 'Signature cleared' : 'Last stroke removed');
+    announce('Last stroke removed');
   }
 
   function clear() {
@@ -283,7 +283,7 @@ ${opts.showControls ? controlsHTML() : ''}
 
   return {
     undo, clear, isEmpty, toSVG, toDataURL, toPNG, destroy,
-    setColor, setSize, announce,
+    setColor, setSize,
     get strokeCount() { return strokes.length; },
   };
 }
