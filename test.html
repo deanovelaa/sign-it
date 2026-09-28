@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign It — self check</title>
+<link rel="stylesheet" href="src/signature-pad.css">
+<style>body{font:14px/1.5 ui-monospace,Menlo,monospace;margin:1rem}#pad{width:400px}.fail{color:#b91c1c}</style>
+</head>
+<body>
+<h1>Sign It — self check</h1>
+<p>Open this file in a browser. Every line must read PASS.</p>
+<div id="pad"></div>
+<pre id="results">running…</pre>
+<script type="module">
+import { mountSignaturePad } from './src/signature-pad.js';
+
+const log = [];
+let failed = 0;
+const ok = (name, cond, detail = '') => {
+  if (!cond) failed++;
+  log.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${detail && !cond ? ` — ${detail}` : ''}`);
+};
+
+const pad = mountSignaturePad('#pad');
+const surface = document.querySelector('.sp-surface');
+
+/** Drive the component through real PointerEvents, the same path a finger takes. */
+function stroke(points, id) {
+  const r = surface.getBoundingClientRect();
+  const ev = (type, [x, y]) => surface.dispatchEvent(new PointerEvent(type, {
+    pointerId: id, isPrimary: true, bubbles: true, pressure: 0.5,
+    clientX: r.left + x, clientY: r.top + y,
+  }));
+  ev('pointerdown', points[0]);
+  for (const p of points.slice(1)) ev('pointermove', p);
+  ev('pointerup', points.at(-1));
+}
+
+const line = (x0, y0, x1, y1, n = 24) =>
+  Array.from({ length: n }, (_, i) => [x0 + ((x1 - x0) * i) / (n - 1), y0 + ((y1 - y0) * i) / (n - 1)]);
+
+// --- empty state -----------------------------------------------------------
+ok('starts empty', pad.isEmpty() && pad.toSVG() === '');
+
+// --- one stroke ------------------------------------------------------------
+stroke(line(100, 40, 300, 120), 1);
+ok('one stroke committed', pad.strokeCount === 1, `got ${pad.strokeCount}`);
+ok('no longer empty', !pad.isEmpty());
+ok('hint hides once ink exists', document.querySelector('.sp-hint').offsetParent === null);
+
+const svg = pad.toSVG();
+ok('export has a viewBox', /viewBox="[-\d. ]+"/.test(svg), svg.slice(0, 120));
+ok('export has no width/height', !/\s(width|height)=/.test(svg), svg.slice(0, 120));
+
+// perfect-freehand returns an outline polygon: it must be filled, never stroked.
+ok('path is filled', /<path [^>]*fill="#/.test(svg), svg.slice(0, 200));
+ok('path is not stroked', !/stroke-width|stroke="(?!none)/.test(svg));
+
+// --- viewBox is cropped to the ink, not the pad ----------------------------
+const [vx, vy, vw, vh] = svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number);
+const padBox = surface.getBoundingClientRect();
+ok('viewBox width tracks the ink', Math.abs(vw - 200) < 12, `w=${vw}`);
+ok('viewBox height tracks the ink', Math.abs(vh - 80) < 12, `h=${vh}`);
+ok('viewBox origin tracks the ink', Math.abs(vx - 100) < 8 && Math.abs(vy - 40) < 8, `${vx},${vy}`);
+ok('viewBox is smaller than the pad', vw < padBox.width && vh < padBox.height);
+
+// --- colour is per stroke --------------------------------------------------
+pad.setColor('#ff0000');
+stroke(line(120, 130, 280, 60), 2);
+const both = [...pad.toSVG().matchAll(/fill="([^"]+)"/g)].map((m) => m[1]);
+ok('two strokes exported', both.length === 2, JSON.stringify(both));
+ok('earlier stroke keeps its colour', both[0] === '#111111', both[0]);
+ok('new stroke uses the new colour', both[1] === '#ff0000', both[1]);
+
+// --- currentColor for embedding -------------------------------------------
+const inline = pad.toSVG({ currentColor: true });
+ok('currentColor export swaps every fill', (inline.match(/fill="currentColor"/g) || []).length === 2);
+ok('currentColor export drops literal hexes', !/fill="#/.test(inline));
+
+// Pasted into a page with `color: red`, the signature must actually render red.
+const probe = document.createElement('div');
+probe.style.color = 'red';
+probe.innerHTML = inline;
+document.body.appendChild(probe);
+const inheritedFill = getComputedStyle(probe.querySelector('path')).fill;
+ok('inline snippet inherits the text colour', inheritedFill === 'rgb(255, 0, 0)', inheritedFill);
+probe.remove();
+
+// --- data URL --------------------------------------------------------------
+ok('data URL is well formed', pad.toDataURL().startsWith('data:image/svg+xml,'));
+ok('data URL is percent-encoded', !/[<>"]/.test(pad.toDataURL()));
+
+// --- undo ------------------------------------------------------------------
+pad.undo();
+ok('undo removes exactly one stroke', pad.strokeCount === 1, `got ${pad.strokeCount}`);
+pad.undo();
+ok('undo empties the pad', pad.isEmpty());
+let threw = false;
+try { pad.undo(); pad.undo(); } catch { threw = true; }
+ok('undo past empty does not throw', !threw);
+ok('empty export is a blank string', pad.toSVG() === '' && pad.toDataURL() === '');
+
+// --- clear -----------------------------------------------------------------
+stroke(line(100, 50, 200, 100), 3);
+stroke(line(200, 50, 300, 100), 4);
+pad.clear();
+ok('clear removes everything', pad.isEmpty() && pad.strokeCount === 0);
+ok('hint returns when cleared', document.querySelector('.sp-hint').offsetParent !== null);
+
+// --- PNG -------------------------------------------------------------------
+stroke(line(100, 40, 300, 120), 5);
+const blob = await pad.toPNG(2);
+ok('toPNG resolves a PNG blob', blob instanceof Blob && blob.type === 'image/png', String(blob && blob.type));
+ok('PNG has bytes', blob.size > 0, String(blob && blob.size));
+
+// --- layout ----------------------------------------------------------------
+ok('no horizontal overflow', document.documentElement.scrollWidth <= window.innerWidth + 1,
+  `${document.documentElement.scrollWidth} > ${window.innerWidth}`);
+
+// --- teardown --------------------------------------------------------------
+pad.destroy();
+ok('destroy empties the host', document.querySelector('#pad').children.length === 0);
+
+const summary = failed ? `${failed} FAILED` : `all ${log.length} checks passed`;
+document.title = failed ? `FAIL (${failed})` : 'PASS';
+const out = document.querySelector('#results');
+out.textContent = `${log.join('\n')}\n\n${summary}`;
+if (failed) out.className = 'fail';
+</script>
+</body>
+</html>
