@@ -1,0 +1,169 @@
+/* Sign It — component styles only. Page styles live elsewhere.
+   Every colour reads a shared token with a sensible fallback, so the pad
+   inherits a host site's theme when it defines these, and still looks right
+   when it does not. */
+
+.signature-pad {
+  --sp-ease-colour: 150ms;
+  --sp-ease-motion: 220ms;
+  display: grid;
+  gap: 0.75rem;
+  color: var(--text-primary, #24242b);
+  font: inherit;
+}
+
+.sp-stage {
+  position: relative;
+  border: 1px solid var(--border-color, #d9d9e0);
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+}
+
+.sp-surface {
+  display: block;
+  width: 100%;
+  height: clamp(160px, 34vw, 260px);
+  /* Without this, a finger drag scrolls the page instead of drawing. */
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.sp-surface:focus-visible {
+  outline: 2px solid var(--text-strong, #0f0f14);
+  outline-offset: -2px;
+}
+
+.sp-hint {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary, #6b6b78);
+  pointer-events: none;
+}
+
+/* An author `display` beats the UA's [hidden] rule, so restate it. */
+.sp-hint[hidden] {
+  display: none;
+}
+
+.sp-note {
+  margin: 0;
+  color: var(--text-secondary, #6b6b78);
+}
+
+.sp-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.sp-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sp-actions {
+  margin-inline-start: auto;
+}
+
+.signature-pad button {
+  font: inherit;
+  color: var(--text-primary, #24242b);
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #d9d9e0);
+  border-radius: var(--radius, 10px);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: background var(--sp-ease-colour), color var(--sp-ease-colour),
+    border-color var(--sp-ease-colour);
+}
+
+.signature-pad button:hover:not(:disabled) {
+  border-color: var(--text-secondary, #6b6b78);
+}
+
+.signature-pad button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.signature-pad :is(button, input):focus-visible {
+  outline: 2px solid var(--text-strong, #0f0f14);
+  outline-offset: 2px;
+}
+
+.signature-pad .sp-swatch {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  /* The chip stays light in both themes, or a near-black preset would be
+     invisible against a dark page background. */
+  background: #ffffff;
+  border: 1px solid var(--border-color, #d9d9e0);
+  transition: transform var(--sp-ease-motion), box-shadow var(--sp-ease-colour);
+}
+
+.signature-pad .sp-swatch::after {
+  content: '';
+  width: 64%;
+  height: 64%;
+  border-radius: 50%;
+  background: var(--swatch);
+}
+
+.signature-pad .sp-swatch:hover {
+  transform: translateY(-1px);
+}
+
+.signature-pad .sp-swatch[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--bg-primary, #fff), 0 0 0 4px var(--text-strong, #0f0f14);
+}
+
+.sp-custom input[type='color'] {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border-color, #d9d9e0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.sp-size span {
+  color: var(--text-secondary, #6b6b78);
+}
+
+.sp-range {
+  width: 7rem;
+  accent-color: var(--text-strong, #0f0f14);
+}
+
+/* Announcements are for assistive tech; the visible UI already shows the change. */
+.sp-status,
+.sp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signature-pad *,
+  .signature-pad *::before {
+    transition-duration: 0s !important;
+  }
+  .signature-pad .sp-swatch:hover {
+    transform: none;
+  }
+}
