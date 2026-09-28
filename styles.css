@@ -1,0 +1,180 @@
+/* Page styles for the standalone demo. The pad itself is styled by src/signature-pad.css. */
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f6f8;
+  --text-primary: #24242b;
+  --text-strong: #0f0f14;
+  --text-secondary: #62626f;
+  --border-color: #d9d9e0;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-primary: #17171a;
+    --bg-secondary: #202024;
+    --text-primary: #e6e6ea;
+    --text-strong: #ffffff;
+    --text-secondary: #a0a0ad;
+    --border-color: #34343c;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg-primary: #17171a;
+  --bg-secondary: #202024;
+  --text-primary: #e6e6ea;
+  --text-strong: #ffffff;
+  --text-secondary: #a0a0ad;
+  --border-color: #34343c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2.5rem 1rem 4rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: 1rem/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  /* One type size almost everywhere; hierarchy comes from colour. */
+  -webkit-text-size-adjust: 100%;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 2rem;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+p {
+  margin: 0;
+}
+
+.intro {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.lede {
+  color: var(--text-primary);
+}
+
+.privacy,
+.note,
+footer,
+.png-label {
+  color: var(--text-secondary);
+}
+
+.exports {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.adapt {
+  display: flex;
+  gap: 0.6rem;
+  align-items: start;
+  color: var(--text-secondary);
+}
+
+.adapt input {
+  margin: 0.25rem 0 0;
+  accent-color: var(--text-strong);
+  flex: none;
+}
+
+.export-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.png {
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.png-label {
+  margin-inline-end: 0.25rem;
+}
+
+button {
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:is(button, input, a):focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 2px;
+}
+
+code,
+.dep {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0s !important;
+    animation: none !important;
+  }
+}
+
+/* The pad is mounted with a white paper background, so its in-pad text needs
+   contrast against paper rather than against the page. */
+#pad .sp-hint {
+  color: #62626f;
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign It — handwritten signature to SVG, in your browser</title>
+<meta name="description" content="Draw a handwritten signature and export it as a clean SVG. Runs entirely in your browser — nothing is uploaded anywhere.">
+<link rel="stylesheet" href="src/signature-pad.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <header class="intro">
+    <h1>Sign It</h1>
+    <p class="lede">Draw your signature. Export it as a clean SVG that scales anywhere.</p>
+    <p class="privacy">
+      Everything happens in this tab. There is no server, no upload and no tracking —
+      your signature never leaves your device.
+    </p>
+  </header>
+
+  <div id="pad"></div>
+
+  <section class="exports" aria-labelledby="exports-heading">
+    <h2 id="exports-heading">Export</h2>
+
+    <label class="adapt">
+      <input type="checkbox" id="adapt" checked>
+      <span>Adapt to text colour — the signature inherits the colour of whatever page it lands in.</span>
+    </label>
+
+    <div class="export-grid">
+      <button type="button" data-export="download-svg">Download SVG</button>
+      <button type="button" data-export="copy-svg">Copy SVG code</button>
+      <button type="button" data-export="copy-dataurl">Copy data URL</button>
+      <button type="button" data-export="copy-inline">Copy inline HTML</button>
+    </div>
+
+    <div class="export-grid png" role="group" aria-label="Download PNG">
+      <span class="png-label">Download PNG</span>
+      <button type="button" data-png="1">1×</button>
+      <button type="button" data-png="2">2×</button>
+      <button type="button" data-png="3">3×</button>
+    </div>
+
+    <p class="note">
+      The SVG export is cropped tightly to your ink and carries a <code>viewBox</code> with no
+      fixed width or height, so it scales to fit wherever you put it. PNG is the fallback for
+      tools that cannot take vectors.
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      An image, not a legal signature — this tool does not sign documents or create an audit trail.
+      MIT licensed. Built on
+      <span class="dep">perfect-freehand</span>, vendored into the repo so the page works offline.
+    </p>
+  </footer>
+</main>
+
+<p class="sr-only" role="status" aria-live="polite" id="live"></p>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
