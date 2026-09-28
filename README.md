@@ -4,7 +4,7 @@ Draw a handwritten signature with a mouse, finger or stylus and export it as a c
 
 ![The Sign It page: a signature drawn on a white pad, with colour, size, undo and clear controls beneath it and an export panel below.](screenshot.png)
 
-**[Live demo](https://YOUR-USERNAME.github.io/sign-it/)**
+**[Live demo](https://deanovelaa.github.io/sign-it/)**
 
 ## How it works
 
